@@ -3,6 +3,8 @@ package repository;
 import entity.OperacaoEntity;
 import structure.Pilha;
 
+import java.util.List;
+
 public class HistoricoRepository {
 
     private final Pilha<OperacaoEntity> pilha = new Pilha<>();
@@ -18,6 +20,11 @@ public class HistoricoRepository {
     public OperacaoEntity ultima() {
         return pilha.peek();
     }
+
+    public List<OperacaoEntity> listar() {
+        return pilha.listar(); // se existir
+    }
+
 
     public boolean vazio() {
         return pilha.isEmpty();

@@ -1,5 +1,8 @@
 package structure;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Pilha<T> {
 
     private No<T> topo;
@@ -22,6 +25,22 @@ public class Pilha<T> {
         topo = new No<>(valor, topo);
         tamanho++;
     }
+
+    public List<T> listar() {
+
+        List<T> lista = new ArrayList<>();
+
+        No<T> atual = topo;
+
+        while (atual != null) {
+            lista.add(atual.valor);
+            atual = atual.proximo;
+        }
+
+        return lista;
+    }
+
+
 
     // =========================
     // POP (desempilhar)
