@@ -1,0 +1,29 @@
+package repository;
+
+import entity.OperacaoEntity;
+import structure.Pilha;
+
+public class HistoricoRepository {
+
+    private final Pilha<OperacaoEntity> pilha = new Pilha<>();
+
+    public void registrar(String descricao) {
+        pilha.push(new OperacaoEntity(descricao));
+    }
+
+    public OperacaoEntity desfazer() {
+        return pilha.pop();
+    }
+
+    public OperacaoEntity ultima() {
+        return pilha.peek();
+    }
+
+    public boolean vazio() {
+        return pilha.isEmpty();
+    }
+
+    public int total() {
+        return pilha.size();
+    }
+}
