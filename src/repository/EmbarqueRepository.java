@@ -3,13 +3,11 @@ package repository;
 import entity.PassageiroEntity;
 import structure.Fila;
 import structure.FilaPrioridade;
-
 import java.util.Comparator;
 
 public class EmbarqueRepository {
 
     private final Fila<PassageiroEntity> filaNormal = new Fila<>();
-
     private final FilaPrioridade<PassageiroEntity> filaPrioridade;
 
     public EmbarqueRepository(Comparator<PassageiroEntity> comparator) {
@@ -24,12 +22,11 @@ public class EmbarqueRepository {
         filaPrioridade.add(passageiro);
     }
 
-    public PassageiroEntity proximo() {
 
+    public PassageiroEntity proximo() {
         if (!filaPrioridade.isEmpty()) {
             return filaPrioridade.poll();
         }
-
         return filaNormal.dequeue();
     }
 
@@ -45,3 +42,4 @@ public class EmbarqueRepository {
         return filaNormal.isEmpty() && filaPrioridade.isEmpty();
     }
 }
+
