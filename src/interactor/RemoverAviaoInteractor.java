@@ -23,7 +23,7 @@ public class RemoverAviaoInteractor{
         if (aviao == null) {
             return false;
         }
-
+       
         boolean removido = aviaoRepository.removerPorCodigo(codigo);
 
         if (removido) {

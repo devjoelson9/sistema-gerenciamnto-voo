@@ -10,7 +10,7 @@ public class EmbarcarInteractor {
     private final AviaoRepository aviaoRepository;
     private final HistoricoRepository historicoRepository;
 
-    public EmbarcarInteractor(
+    public EmbarcarInteractor( 
             AviaoRepository aviaoRepository,
             HistoricoRepository historicoRepository) {
 
