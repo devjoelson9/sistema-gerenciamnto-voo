@@ -1,25 +1,32 @@
 package interactor;
 
+import entity.AviaoEntity;
 import entity.PassageiroEntity;
-import repository.EmbarqueRepository;
+import repository.AviaoRepository;
 import repository.HistoricoRepository;
 
-public class EmbarcarInteractor implements Interactor<PassageiroEntity>{
+public class EmbarcarInteractor {
 
-    private final EmbarqueRepository embarqueRepository;
+    private final AviaoRepository aviaoRepository;
     private final HistoricoRepository historicoRepository;
 
     public EmbarcarInteractor(
-            EmbarqueRepository embarqueRepository,
+            AviaoRepository aviaoRepository,
             HistoricoRepository historicoRepository) {
 
-        this.embarqueRepository = embarqueRepository;
+        this.aviaoRepository = aviaoRepository;
         this.historicoRepository = historicoRepository;
     }
 
-    public PassageiroEntity executar() {
+    public PassageiroEntity executar(String codigoVoo) {
 
-        PassageiroEntity passageiro = embarqueRepository.proximo();
+        AviaoEntity aviao = aviaoRepository.buscarPorCodigo(codigoVoo);
+
+        if (aviao == null) {
+            throw new IllegalArgumentException("Voo não encontrado");
+        }
+
+        PassageiroEntity passageiro = aviao.proximoPassageiro();
 
         if (passageiro == null) {
             return null;
@@ -28,11 +35,11 @@ public class EmbarcarInteractor implements Interactor<PassageiroEntity>{
         historicoRepository.registrar(
                 "Embarque realizado: " +
                         passageiro.getNome() +
-                        " | Prioridade: " + passageiro.getPrioridade()
+                        " | voo: " + codigoVoo +
+                        " | prioridade: " + passageiro.getPrioridade()
         );
 
         return passageiro;
     }
 
 }
-

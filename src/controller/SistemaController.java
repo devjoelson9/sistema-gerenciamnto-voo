@@ -19,6 +19,7 @@ public class SistemaController {
     private final EmbarcarInteractor embarcar;
     private final ListarHistoricoInteractor listarHistorico;
     private final DesfazerOperacaoInteractor desfazer;
+    private final BuscarAviaoInteractor buscarAviao;
 
     public SistemaController(
             CadastrarAviaoInteractor cadastrarAviao,
@@ -27,7 +28,8 @@ public class SistemaController {
             VenderPassagemInteractor venderPassagem,
             EmbarcarInteractor embarcar,
             ListarHistoricoInteractor listarHistorico,
-            DesfazerOperacaoInteractor desfazer
+            DesfazerOperacaoInteractor desfazer,
+            BuscarAviaoInteractor buscarAviao
     ) {
         this.cadastrarAviao = cadastrarAviao;
         this.removerAviao = removerAviao;
@@ -36,6 +38,7 @@ public class SistemaController {
         this.embarcar = embarcar;
         this.listarHistorico = listarHistorico;
         this.desfazer = desfazer;
+        this.buscarAviao = buscarAviao;
     }
 
     public void iniciar() {
@@ -74,6 +77,7 @@ public class SistemaController {
             System.out.println("1 - Cadastrar novo avião");
             System.out.println("2 - Listar aviões cadastrados");
             System.out.println("3 - Remover avião");
+            System.out.println("4 - Buscar avião");
             System.out.println("0 - Voltar");
             System.out.print("Escolha: ");
 
@@ -83,10 +87,35 @@ public class SistemaController {
                 case 1 -> cadastrarAviao();
                 case 2 -> listarAvioes();
                 case 3 -> removerAviao();
+                case 4 -> buscarAviao();
             }
 
         } while (op != 0);
     }
+
+    private void buscarAviao() {
+
+        System.out.println("\n=========== BUSCAR AVIÃO ===========");
+
+        System.out.print("Informe o código do avião: ");
+        String codigo = scanner.nextLine();
+
+        try {
+            AviaoEntity aviao = buscarAviao.executar(codigo);
+
+            System.out.println("\n✔ Avião encontrado!");
+            System.out.println("------------------------------------");
+            System.out.println("Código     : " + aviao.getCodigo());
+            System.out.println("Modelo     : " + aviao.getModelo());
+            System.out.println("Capacidade : " + aviao.getCapacidade());
+            System.out.println("------------------------------------");
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("\n✖ " + e.getMessage());
+        }
+    }
+
+
 
     private void menuPassageiros() {
 
@@ -135,6 +164,9 @@ public class SistemaController {
     }
 
     private void cadastrarAviao() {
+
+        System.out.println("\n=========== CADASTRAR AVIÃO ===========");
+
         System.out.print("Código: ");
         String codigo = scanner.nextLine();
 
@@ -144,83 +176,160 @@ public class SistemaController {
         System.out.print("Capacidade: ");
         int cap = Integer.parseInt(scanner.nextLine());
 
-        cadastrarAviao.executar(codigo, modelo, cap);
-        System.out.println("Avião cadastrado!");
+        boolean sucesso = cadastrarAviao.executar(codigo, modelo, cap);
+
+        if (sucesso) {
+            System.out.println("\nAvião cadastrado com sucesso!");
+        } else {
+            System.out.println("\nErro: código já cadastrado ou capacidade inválida!");
+        }
     }
+
+
 
     private void listarAvioes() {
 
         List<AviaoEntity> lista = listarAvioes.executar();
 
+        System.out.println("\n================ LISTA DE AVIÕES ===============");
+
         if (lista.isEmpty()) {
             System.out.println("Nenhum avião cadastrado.");
+            System.out.println("============================================\n");
             return;
         }
 
+        System.out.printf("%-10s %-20s %-10s%n",
+                "Código", "Modelo", "Capacidade");
+
+        System.out.println("------------------------------------------------");
+
         for (AviaoEntity a : lista) {
-            System.out.println(a.getCodigo() + " | " + a.getModelo() + " | Cap: " + a.getCapacidadeMaxima());
+            System.out.printf("%-10s %-20s %-10d%n",
+                    a.getCodigo(),
+                    a.getModelo(),
+                    a.getCapacidade());
         }
+
+        System.out.println("================================================\n");
     }
 
+
     private void removerAviao() {
-        System.out.print("Código: ");
+
+        System.out.println("\n=========== REMOVER AVIÃO ===========");
+
+        System.out.print("Informe o código: ");
         String codigo = scanner.nextLine();
 
         boolean ok = removerAviao.executar(codigo);
 
-        System.out.println(ok ? "Removido!" : "Não encontrado.");
+        if (ok)
+            System.out.println("✔ Avião removido com sucesso!");
+        else
+            System.out.println("✖ Avião não encontrado.");
+
     }
+
 
     private void venderPassagem() {
 
-        System.out.print("Nome: ");
+        System.out.println("\n=========== VENDA DE PASSAGEM ===========");
+
+        List<AviaoEntity> avioes = listarAvioes.executar();
+
+        if (avioes.isEmpty()) {
+            System.out.println("Nenhum voo disponível.");
+            return;
+        }
+
+        System.out.println("\nVoos disponíveis:");
+        for (int i = 0; i < avioes.size(); i++) {
+            AviaoEntity a = avioes.get(i);
+            System.out.println((i + 1) + " - " + a.getCodigo() + " | " + a.getModelo());
+        }
+
+        System.out.print("\nEscolha o voo: ");
+        int escolha = Integer.parseInt(scanner.nextLine()) - 1;
+
+        if (escolha < 0 || escolha >= avioes.size()) {
+            System.out.println("Opção inválida.");
+            return;
+        }
+
+        AviaoEntity aviao = avioes.get(escolha);
+
+        System.out.print("Nome do passageiro: ");
         String nome = scanner.nextLine();
 
         System.out.print("Documento: ");
         String doc = scanner.nextLine();
 
-        System.out.print("Voo: ");
-        String voo = scanner.nextLine();
-
         System.out.print("Prioridade (0 normal / >0 prioritário): ");
         int prioridade = Integer.parseInt(scanner.nextLine());
 
-        venderPassagem.executar(nome, doc, voo, prioridade);
+        venderPassagem.executar(nome, doc, aviao.getCodigo(), prioridade);
 
-        System.out.println("Passagem vendida!");
+        System.out.println("\n✔ Passageiro adicionado à fila do voo " + aviao.getCodigo());
+
     }
+
+
 
     private void embarcar() {
 
-        PassageiroEntity p = embarcar.executar();
+        System.out.println("\n=========== EMBARQUE ===========");
 
-        if (p == null)
-            System.out.println("Fila vazia.");
-        else
-            System.out.println("Embarcou: " + p.getNome());
+        System.out.print("Digite o código do voo: ");
+        String codigo = scanner.nextLine();
+
+        try {
+            PassageiroEntity p = embarcar.executar(codigo);
+
+            if (p == null) {
+                System.out.println("Fila de embarque vazia.");
+            } else {
+                System.out.println("✔ Passageiro embarcado: " + p.getNome());
+            }
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Erro: " + e.getMessage());
+        }
     }
 
+
+
     private void exibirHistorico() {
+
+        System.out.println("\n=========== HISTÓRICO DE OPERAÇÕES ===========");
 
         List<OperacaoEntity> lista = listarHistorico.executar();
 
         if (lista.isEmpty()) {
-            System.out.println("Histórico vazio.");
+            System.out.println("Nenhuma operação registrada.");
             return;
         }
 
+        int i = 1;
+
         for (OperacaoEntity op : lista) {
-            System.out.println(op.getDescricao());
+            System.out.println(i++ + " - " + op.getDescricao());
         }
+
     }
 
+
     private void desfazer() {
+
+        System.out.println("\n=========== DESFAZER OPERAÇÃO ===========");
 
         OperacaoEntity op = desfazer.executar();
 
         if (op == null)
             System.out.println("Nada para desfazer.");
         else
-            System.out.println("Desfeito: " + op.getDescricao());
+            System.out.println("✔ Operação desfeita: " + op.getDescricao());
+
     }
+
 }

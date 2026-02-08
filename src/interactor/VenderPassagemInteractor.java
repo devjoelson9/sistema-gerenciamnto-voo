@@ -1,44 +1,54 @@
 package interactor;
 
+import entity.AviaoEntity;
 import entity.PassageiroEntity;
-import repository.EmbarqueRepository;
+import repository.AviaoRepository;
 import repository.HistoricoRepository;
 
 public class VenderPassagemInteractor {
 
-    private final EmbarqueRepository embarqueRepository;
+    private final AviaoRepository aviaoRepository;
     private final HistoricoRepository historicoRepository;
 
     private int contadorChegada = 0;
 
     public VenderPassagemInteractor(
-            EmbarqueRepository embarqueRepository,
+            AviaoRepository aviaoRepository,
             HistoricoRepository historicoRepository) {
 
-        this.embarqueRepository = embarqueRepository;
+        this.aviaoRepository = aviaoRepository;
         this.historicoRepository = historicoRepository;
     }
 
-    public void executar(String nome, String documento, String voo, int prioridade) {
+    public void executar(String nome, String documento, String codigoVoo, int prioridade) {
+
+        AviaoEntity aviao = aviaoRepository.buscarPorCodigo(codigoVoo);
+
+        if (aviao == null) {
+            throw new IllegalArgumentException("Voo não encontrado");
+        }
+
         int ordem = contadorChegada++;
 
-        PassageiroEntity passageiro = new PassageiroEntity(nome, documento, prioridade, voo, ordem);
+        PassageiroEntity passageiro =
+                new PassageiroEntity(nome, documento, prioridade, ordem);
 
+        // ✅ AGORA O AVIÃO DECIDE A FILA
+        aviao.adicionarPassageiro(passageiro);
+
+        // histórico
         if (prioridade > 0) {
-
-            embarqueRepository.adicionarPrioritario(passageiro);
-
             historicoRepository.registrar(
                     "Passagem PRIORITÁRIA vendida: " + nome +
+                            " | voo: " + codigoVoo +
                             " | prioridade: " + prioridade
             );
-
         } else {
-            embarqueRepository.adicionarNormal(passageiro);
-
             historicoRepository.registrar(
-                    "Passagem vendida: " + nome
+                    "Passagem vendida: " + nome +
+                            " | voo: " + codigoVoo
             );
         }
     }
+
 }

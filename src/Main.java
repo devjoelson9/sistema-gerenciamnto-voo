@@ -1,7 +1,6 @@
 import controller.SistemaController;
 import repository.*;
 import interactor.*;
-import structure.PassageiroPrioridadeComparator;
 
 public class Main {
 
@@ -9,16 +8,16 @@ public class Main {
 
         var aviaoRepo = new AviaoRepository();
         var historicoRepo = new HistoricoRepository();
-        var embarqueRepo = new EmbarqueRepository(new PassageiroPrioridadeComparator());
 
         var controller = new SistemaController(
                 new CadastrarAviaoInteractor(aviaoRepo, historicoRepo),
                 new RemoverAviaoInteractor(aviaoRepo, historicoRepo),
                 new ListarAvioesInteractor(aviaoRepo),
-                new VenderPassagemInteractor(embarqueRepo, historicoRepo),
-                new EmbarcarInteractor(embarqueRepo, historicoRepo),
+                new VenderPassagemInteractor(aviaoRepo, historicoRepo),
+                new EmbarcarInteractor(aviaoRepo, historicoRepo),
                 new ListarHistoricoInteractor(historicoRepo),
-                new DesfazerOperacaoInteractor(historicoRepo)
+                new DesfazerOperacaoInteractor(historicoRepo),
+                new BuscarAviaoInteractor(aviaoRepo)
         );
 
         controller.iniciar();
