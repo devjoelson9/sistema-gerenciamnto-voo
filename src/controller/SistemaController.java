@@ -41,6 +41,43 @@ public class SistemaController {
         this.buscarAviao = buscarAviao;
     }
 
+    /* ======================================================
+       MÉTODOS AUXILIARES (CORREÇÃO DOS BUGS DE INPUT)
+       ====================================================== */
+
+    private int lerInt(String msg) {
+        while (true) {
+            System.out.print(msg);
+            String entrada = scanner.nextLine().trim();
+
+            if (entrada.isEmpty()) {
+                System.out.println("Digite um número válido.");
+                continue;
+            }
+
+            try {
+                return Integer.parseInt(entrada);
+            } catch (NumberFormatException e) {
+                System.out.println("Valor inválido. Digite apenas números.");
+            }
+        }
+    }
+
+    private String lerString(String msg) {
+        while (true) {
+            System.out.print(msg);
+            String s = scanner.nextLine().trim();
+
+            if (!s.isEmpty()) return s;
+
+            System.out.println("Campo não pode ser vazio.");
+        }
+    }
+
+    /* ======================================================
+       MENU PRINCIPAL
+       ====================================================== */
+
     public void iniciar() {
 
         int opcao;
@@ -53,9 +90,8 @@ public class SistemaController {
             System.out.println("2 - Gestão de Passageiros e Embarque");
             System.out.println("3 - Histórico de Operações");
             System.out.println("0 - Encerrar Sistema");
-            System.out.print("Escolha: ");
 
-            opcao = Integer.parseInt(scanner.nextLine());
+            opcao = lerInt("Escolha: ");
 
             switch (opcao) {
                 case 1 -> menuAvioes();
@@ -65,6 +101,10 @@ public class SistemaController {
 
         } while (opcao != 0);
     }
+
+    /* ======================================================
+       AVIÕES
+       ====================================================== */
 
     private void menuAvioes() {
 
@@ -79,9 +119,8 @@ public class SistemaController {
             System.out.println("3 - Remover avião");
             System.out.println("4 - Buscar avião");
             System.out.println("0 - Voltar");
-            System.out.print("Escolha: ");
 
-            op = Integer.parseInt(scanner.nextLine());
+            op = lerInt("Escolha: ");
 
             switch (op) {
                 case 1 -> cadastrarAviao();
@@ -93,29 +132,84 @@ public class SistemaController {
         } while (op != 0);
     }
 
+    private void cadastrarAviao() {
+
+        System.out.println("\n=========== CADASTRAR AVIÃO ===========");
+
+        String codigo = lerString("Código: ");
+        String modelo = lerString("Modelo: ");
+        int cap = lerInt("Capacidade: ");
+
+        boolean sucesso = cadastrarAviao.executar(codigo, modelo, cap);
+
+        System.out.println(sucesso ?
+                "\n✔ Avião cadastrado com sucesso!" :
+                "\n✖ Erro: código já cadastrado ou capacidade inválida!");
+    }
+
+    private void listarAvioes() {
+
+        List<AviaoEntity> lista = listarAvioes.executar();
+
+        System.out.println("\n================ LISTA DE AVIÕES ===============");
+
+        if (lista.isEmpty()) {
+            System.out.println("Nenhum avião cadastrado.");
+            return;
+        }
+
+        System.out.printf("%-10s %-20s %-10s%n", "Código", "Modelo", "Capacidade");
+        System.out.println("------------------------------------------------");
+
+        for (AviaoEntity a : lista) {
+            System.out.printf("%-10s %-20s %-10d%n",
+                    a.getCodigo(),
+                    a.getModelo(),
+                    a.getCapacidade());
+        }
+    }
+
+    private void removerAviao() {
+
+        System.out.println("\n=========== REMOVER AVIÃO ===========");
+
+        String codigo = lerString("Informe o código: ");
+
+        boolean ok = removerAviao.executar(codigo);
+
+        System.out.println(ok ?
+                "✔ Avião removido com sucesso!" :
+                "✖ Avião não encontrado.");
+    }
+
     private void buscarAviao() {
 
         System.out.println("\n=========== BUSCAR AVIÃO ===========");
 
-        System.out.print("Informe o código do avião: ");
-        String codigo = scanner.nextLine();
+        String codigo = lerString("Informe o código: ");
 
         try {
             AviaoEntity aviao = buscarAviao.executar(codigo);
 
-            System.out.println("\n✔ Avião encontrado!");
-            System.out.println("------------------------------------");
-            System.out.println("Código     : " + aviao.getCodigo());
-            System.out.println("Modelo     : " + aviao.getModelo());
-            System.out.println("Capacidade : " + aviao.getCapacidade());
-            System.out.println("------------------------------------");
+            System.out.printf("""
+                    ------------------------------------
+                    Código     : %s
+                    Modelo     : %s
+                    Capacidade : %d
+                    ------------------------------------
+                    """,
+                    aviao.getCodigo(),
+                    aviao.getModelo(),
+                    aviao.getCapacidade());
 
         } catch (IllegalArgumentException e) {
-            System.out.println("\n✖ " + e.getMessage());
+            System.out.println("✖ " + e.getMessage());
         }
     }
 
-
+    /* ======================================================
+       PASSAGEIROS
+       ====================================================== */
 
     private void menuPassageiros() {
 
@@ -128,9 +222,8 @@ public class SistemaController {
             System.out.println("1 - Vender passagem");
             System.out.println("2 - Embarcar próximo passageiro");
             System.out.println("0 - Voltar");
-            System.out.print("Escolha: ");
 
-            op = Integer.parseInt(scanner.nextLine());
+            op = lerInt("Escolha: ");
 
             switch (op) {
                 case 1 -> venderPassagem();
@@ -139,6 +232,53 @@ public class SistemaController {
 
         } while (op != 0);
     }
+
+    private void venderPassagem() {
+
+        List<AviaoEntity> avioes = listarAvioes.executar();
+
+        if (avioes.isEmpty()) {
+            System.out.println("Nenhum voo disponível.");
+            return;
+        }
+
+        for (int i = 0; i < avioes.size(); i++) {
+            AviaoEntity a = avioes.get(i);
+            System.out.println((i + 1) + " - " + a.getCodigo() + " | " + a.getModelo());
+        }
+
+        int escolha = lerInt("Escolha o voo: ") - 1;
+
+        if (escolha < 0 || escolha >= avioes.size()) {
+            System.out.println("Opção inválida.");
+            return;
+        }
+
+        String nome = lerString("Nome do passageiro: ");
+        String doc = lerString("Documento: ");
+        int prioridade = lerInt("Prioridade (0 normal / >0 prioritário): ");
+
+        venderPassagem.executar(nome, doc, avioes.get(escolha).getCodigo(), prioridade);
+
+        System.out.println("✔ Passageiro adicionado à fila.");
+    }
+
+    private void embarcar() {
+
+        System.out.println("\n=========== EMBARQUE ===========");
+
+        String codigo = lerString("Digite o código do voo: ");
+
+        PassageiroEntity p = embarcar.executar(codigo);
+
+        System.out.println(p == null ?
+                "Fila vazia." :
+                "✔ Passageiro embarcado: " + p.getNome());
+    }
+
+    /* ======================================================
+       HISTÓRICO
+       ====================================================== */
 
     private void menuHistorico() {
 
@@ -151,9 +291,8 @@ public class SistemaController {
             System.out.println("1 - Exibir histórico");
             System.out.println("2 - Desfazer última operação");
             System.out.println("0 - Voltar");
-            System.out.print("Escolha: ");
 
-            op = Integer.parseInt(scanner.nextLine());
+            op = lerInt("Escolha: ");
 
             switch (op) {
                 case 1 -> exibirHistorico();
@@ -163,173 +302,16 @@ public class SistemaController {
         } while (op != 0);
     }
 
-    private void cadastrarAviao() {
-
-        System.out.println("\n=========== CADASTRAR AVIÃO ===========");
-
-        System.out.print("Código: ");
-        String codigo = scanner.nextLine();
-
-        System.out.print("Modelo: ");
-        String modelo = scanner.nextLine();
-
-        System.out.print("Capacidade: ");
-        int cap = Integer.parseInt(scanner.nextLine());
-
-        boolean sucesso = cadastrarAviao.executar(codigo, modelo, cap);
-
-        if (sucesso) {
-            System.out.println("\nAvião cadastrado com sucesso!");
-        } else {
-            System.out.println("\nErro: código já cadastrado ou capacidade inválida!");
-        }
-    }
-
-
-
-    private void listarAvioes() {
-
-        List<AviaoEntity> lista = listarAvioes.executar();
-
-        System.out.println("\n================ LISTA DE AVIÕES ===============");
-
-        if (lista.isEmpty()) {
-            System.out.println("Nenhum avião cadastrado.");
-            System.out.println("============================================\n");
-            return;
-        }
-
-        System.out.printf("%-10s %-20s %-10s%n",
-                "Código", "Modelo", "Capacidade");
-
-        System.out.println("------------------------------------------------");
-
-        for (AviaoEntity a : lista) {
-            System.out.printf("%-10s %-20s %-10d%n",
-                    a.getCodigo(),
-                    a.getModelo(),
-                    a.getCapacidade());
-        }
-
-        System.out.println("================================================\n");
-    }
-
-
-    private void removerAviao() {
-
-        System.out.println("\n=========== REMOVER AVIÃO ===========");
-
-        System.out.print("Informe o código: ");
-        String codigo = scanner.nextLine();
-
-        boolean ok = removerAviao.executar(codigo);
-
-        if (ok)
-            System.out.println("✔ Avião removido com sucesso!");
-        else
-            System.out.println("✖ Avião não encontrado.");
-
-    }
-
-
-    private void venderPassagem() {
-
-        System.out.println("\n=========== VENDA DE PASSAGEM ===========");
-
-        List<AviaoEntity> avioes = listarAvioes.executar();
-
-        if (avioes.isEmpty()) {
-            System.out.println("Nenhum voo disponível.");
-            return;
-        }
-
-        System.out.println("\nVoos disponíveis:");
-        for (int i = 0; i < avioes.size(); i++) {
-            AviaoEntity a = avioes.get(i);
-            System.out.println((i + 1) + " - " + a.getCodigo() + " | " + a.getModelo());
-        }
-
-        System.out.print("\nEscolha o voo: ");
-        int escolha = Integer.parseInt(scanner.nextLine()) - 1;
-
-        if (escolha < 0 || escolha >= avioes.size()) {
-            System.out.println("Opção inválida.");
-            return;
-        }
-
-        AviaoEntity aviao = avioes.get(escolha);
-
-        System.out.print("Nome do passageiro: ");
-        String nome = scanner.nextLine();
-
-        System.out.print("Documento: ");
-        String doc = scanner.nextLine();
-
-        System.out.print("Prioridade (0 normal / >0 prioritário): ");
-        int prioridade = Integer.parseInt(scanner.nextLine());
-
-        venderPassagem.executar(nome, doc, aviao.getCodigo(), prioridade);
-
-        System.out.println("\n✔ Passageiro adicionado à fila do voo " + aviao.getCodigo());
-
-    }
-
-
-
-    private void embarcar() {
-
-        System.out.println("\n=========== EMBARQUE ===========");
-
-        System.out.print("Digite o código do voo: ");
-        String codigo = scanner.nextLine();
-
-        try {
-            PassageiroEntity p = embarcar.executar(codigo);
-
-            if (p == null) {
-                System.out.println("Fila de embarque vazia.");
-            } else {
-                System.out.println("✔ Passageiro embarcado: " + p.getNome());
-            }
-
-        } catch (IllegalArgumentException e) {
-            System.out.println("Erro: " + e.getMessage());
-        }
-    }
-
-
-
     private void exibirHistorico() {
-
-        System.out.println("\n=========== HISTÓRICO DE OPERAÇÕES ===========");
-
-        List<OperacaoEntity> lista = listarHistorico.executar();
-
-        if (lista.isEmpty()) {
-            System.out.println("Nenhuma operação registrada.");
-            return;
-        }
-
-        int i = 1;
-
-        for (OperacaoEntity op : lista) {
-            System.out.println(i++ + " - " + op.getDescricao());
-        }
-
+        listarHistorico.executar()
+                .forEach(op -> System.out.println("- " + op.getDescricao()));
     }
-
 
     private void desfazer() {
-
-        System.out.println("\n=========== DESFAZER OPERAÇÃO ===========");
-
         OperacaoEntity op = desfazer.executar();
 
-        if (op == null)
-            System.out.println("Nada para desfazer.");
-        else
-            System.out.println("✔ Operação desfeita: " + op.getDescricao());
-
+        System.out.println(op == null ?
+                "Nada para desfazer." :
+                "✔ Operação desfeita: " + op.getDescricao());
     }
-
 }
