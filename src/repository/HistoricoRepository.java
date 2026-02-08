@@ -22,7 +22,7 @@ public class HistoricoRepository {
     }
 
     public List<OperacaoEntity> listar() {
-        return pilha.listar(); // se existir
+        return pilha.listar();
     }
 
 

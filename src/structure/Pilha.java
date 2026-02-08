@@ -18,9 +18,6 @@ public class Pilha<T> {
         }
     }
 
-    // =========================
-    // PUSH (empilhar)
-    // =========================
     public void push(T valor) {
         topo = new No<>(valor, topo);
         tamanho++;
@@ -41,10 +38,6 @@ public class Pilha<T> {
     }
 
 
-
-    // =========================
-    // POP (desempilhar)
-    // =========================
     public T pop() {
 
         if (isEmpty()) {
@@ -58,30 +51,18 @@ public class Pilha<T> {
         return valor;
     }
 
-    // =========================
-    // PEEK (ver topo)
-    // =========================
     public T peek() {
         return isEmpty() ? null : topo.valor;
     }
 
-    // =========================
-    // TAMANHO
-    // =========================
     public int size() {
         return tamanho;
     }
 
-    // =========================
-    // VAZIA
-    // =========================
     public boolean isEmpty() {
         return tamanho == 0;
     }
 
-    // =========================
-    // DEBUG
-    // =========================
     @Override
     public String toString() {
 
