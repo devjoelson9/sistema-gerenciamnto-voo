@@ -41,10 +41,6 @@ public class SistemaController {
         this.buscarAviao = buscarAviao;
     }
 
-    /* ======================================================
-       MÉTODOS AUXILIARES (CORREÇÃO DOS BUGS DE INPUT)
-       ====================================================== */
-
     private int lerInt(String msg) {
         while (true) {
             System.out.print(msg);
@@ -74,10 +70,6 @@ public class SistemaController {
         }
     }
 
-    /* ======================================================
-       MENU PRINCIPAL
-       ====================================================== */
-
     public void iniciar() {
 
         int opcao;
@@ -101,10 +93,6 @@ public class SistemaController {
 
         } while (opcao != 0);
     }
-
-    /* ======================================================
-       AVIÕES
-       ====================================================== */
 
     private void menuAvioes() {
 
@@ -143,8 +131,8 @@ public class SistemaController {
         boolean sucesso = cadastrarAviao.executar(codigo, modelo, cap);
 
         System.out.println(sucesso ?
-                "\n✔ Avião cadastrado com sucesso!" :
-                "\n✖ Erro: código já cadastrado ou capacidade inválida!");
+                "\nAvião cadastrado com sucesso!" :
+                "\nErro: código já cadastrado ou capacidade inválida!");
     }
 
     private void listarAvioes() {
@@ -178,8 +166,8 @@ public class SistemaController {
         boolean ok = removerAviao.executar(codigo);
 
         System.out.println(ok ?
-                "✔ Avião removido com sucesso!" :
-                "✖ Avião não encontrado.");
+                "Avião removido com sucesso!" :
+                "Avião não encontrado.");
     }
 
     private void buscarAviao() {
@@ -203,13 +191,9 @@ public class SistemaController {
                     aviao.getCapacidade());
 
         } catch (IllegalArgumentException e) {
-            System.out.println("✖ " + e.getMessage());
+            System.out.println(" " + e.getMessage());
         }
     }
-
-    /* ======================================================
-       PASSAGEIROS
-       ====================================================== */
 
     private void menuPassageiros() {
 
@@ -260,7 +244,7 @@ public class SistemaController {
 
         venderPassagem.executar(nome, doc, avioes.get(escolha).getCodigo(), prioridade);
 
-        System.out.println("✔ Passageiro adicionado à fila.");
+        System.out.println("Passageiro adicionado à fila.");
     }
 
     private void embarcar() {
@@ -273,12 +257,8 @@ public class SistemaController {
 
         System.out.println(p == null ?
                 "Fila vazia." :
-                "✔ Passageiro embarcado: " + p.getNome());
+                "Passageiro embarcado: " + p.getNome());
     }
-
-    /* ======================================================
-       HISTÓRICO
-       ====================================================== */
 
     private void menuHistorico() {
 
@@ -312,6 +292,6 @@ public class SistemaController {
 
         System.out.println(op == null ?
                 "Nada para desfazer." :
-                "✔ Operação desfeita: " + op.getDescricao());
+                "Operação desfeita: " + op.getDescricao());
     }
 }

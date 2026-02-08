@@ -62,22 +62,4 @@ public class Pilha<T> {
     public boolean isEmpty() {
         return tamanho == 0;
     }
-
-    @Override
-    public String toString() {
-
-        StringBuilder sb = new StringBuilder("[Topo -> ");
-
-        No<T> atual = topo;
-
-        while (atual != null) {
-            sb.append(atual.valor);
-            if (atual.proximo != null) sb.append(" | ");
-            atual = atual.proximo;
-        }
-
-        sb.append("]");
-
-        return sb.toString();
-    }
 }

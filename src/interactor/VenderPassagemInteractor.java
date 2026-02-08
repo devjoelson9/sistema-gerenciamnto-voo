@@ -33,10 +33,8 @@ public class VenderPassagemInteractor {
         PassageiroEntity passageiro =
                 new PassageiroEntity(nome, documento, prioridade, ordem);
 
-        // ✅ AGORA O AVIÃO DECIDE A FILA
         aviao.adicionarPassageiro(passageiro);
 
-        // histórico
         if (prioridade > 0) {
             historicoRepository.registrar(
                     "Passagem PRIORITÁRIA vendida: " + nome +
